@@ -20,7 +20,7 @@ class Database(object):
         self.feed = db["feed"]
 
     def add_account(self, name, password):
-        user_key = self.keys.find_one({"name": name})
+        user_key = self.accounts.find_one({"name": name})
         if user_key is None:
             post = {
                 "name": name,
