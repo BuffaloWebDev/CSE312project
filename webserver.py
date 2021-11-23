@@ -8,17 +8,19 @@ newline = "\r\n"
 skipLine = "\r\n\r\n"
 
 
+
 class WebServer(socketserver.StreamRequestHandler):
 
 
     def send(self, message):
         self.request.sendall(message)
 
-    def stitch(self, handler, headerList, body=b''):
+    def stitch(self, headerList, body=b''):
         if isinstance(body, int):
             body = str(body)
         if isinstance(body, str):
             body = body.encode()
+        print(headerList, flush=True)
 
         response = utils.makeHeader(headerList)
         print(response, flush=True)
@@ -27,12 +29,12 @@ class WebServer(socketserver.StreamRequestHandler):
 
 
     def redirect(self, location):
-        responseHeaders = [status[301], "Location: " + location, utils.contentLength(0)]
+        responseHeaders = [utils.status[301], "Location: " + location, utils.contentLength(0)]
         self.stitch(responseHeaders)
 
 
     def sendMessage(self, msg, code, contentType):
-        responseHeaders = [status[code], cType[contentType], nosniff, utils.contentLength(len(msg))]
+        responseHeaders = [utils.status[code], utils.cType[contentType], utils.nosniff, utils.contentLength(len(msg))]
         self.stitch(responseHeaders, msg)
 
 

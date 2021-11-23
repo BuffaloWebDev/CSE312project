@@ -5,29 +5,7 @@ import parse
 import home
 import accounts
 
-# HTTP Status codes
-status = {101: "101 Switching Protocols",
-          200: "200 OK",
-          201: "201 Created",
-          204: "204 No Content",
-          301: "301 Moved Permanently",
-          304: "Not Modified",
-          403: "403 Forbidden",
-          404: "404 Not Found",
-          500: "500 Internal Server Error"}
-
-# MIME content types
-cType = {"plain": "Content-Type: text/plain;charset=UTF-8",
-         "txt": "Content-Type: text/plain;charset=UTF-8",
-         "html": "Content-Type: text/html;charset=UTF-8",
-         "css": "Content-Type: text/css;charset=UTF-8",
-         "js": "Content-Type: text/javascript;charset=UTF-8",
-         "png": "Content-Type: image/png",
-         "jpg": "Content-Type: image/jpeg",
-         "jpeg": "Content-Type: image/jpeg",
-         "mp4": "Content-Type: video/mp4"}
-
-nosniff = "X-Content-Type-Options: nosniff"
+files = ["style.css", "functions.js"]
 
 
 def route(requestHeaders, requestBody, requestType, requestPath, handler):
@@ -39,6 +17,13 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
         elif requestPath == "/websocket" and "Upgrade" in requestHeaders['Connection'] and "websocket" in requestHeaders['Upgrade']:
             randKey = requestHeaders['Sec-WebSocket-Key'][0]
             websocket.establish(handler, randKey)
+
+        elif requestPath[1:] in files:  # public files
+            with open(requestPath[1:], "rb") as requestedFile:
+                responseBody = requestedFile.read()
+            extension = requestPath[1:].split(".")[-1]
+            handler.sendMessage(responseBody, 200, extension)
+
 
         # TODO Add routes for each page in the website with their own .py files (keep it modular)
 

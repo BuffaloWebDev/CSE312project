@@ -4,6 +4,29 @@
 from secrets import token_urlsafe
 
 newLine = "\r\n"
+nosniff = "X-Content-Type-Options: nosniff"
+
+# MIME content types
+cType = {"plain": "Content-Type: text/plain;charset=UTF-8",
+         "txt": "Content-Type: text/plain;charset=UTF-8",
+         "html": "Content-Type: text/html;charset=UTF-8",
+         "css": "Content-Type: text/css;charset=UTF-8",
+         "js": "Content-Type: text/javascript;charset=UTF-8",
+         "png": "Content-Type: image/png",
+         "jpg": "Content-Type: image/jpeg",
+         "jpeg": "Content-Type: image/jpeg",
+         "mp4": "Content-Type: video/mp4"}
+
+# HTTP Status codes
+status = {101: "101 Switching Protocols",
+          200: "200 OK",
+          201: "201 Created",
+          204: "204 No Content",
+          301: "301 Moved Permanently",
+          304: "Not Modified",
+          403: "403 Forbidden",
+          404: "404 Not Found",
+          500: "500 Internal Server Error"}
 
 
 def contentLength(length):

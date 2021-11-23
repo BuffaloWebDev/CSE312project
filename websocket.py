@@ -7,6 +7,7 @@ import parse
 import utils
 import database
 import routes
+import webserver
 
 clients = []
 
@@ -16,7 +17,7 @@ def establish(handler, randKey):
 
     key = (randKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()
     accept_response = b64encode(sha1(key).digest()).strip().decode("ASCII")
-    responseHeaders = [routes.status[101], "Connection: Upgrade", "Upgrade: websocket",
+    responseHeaders = [utils.status[101], "Connection: Upgrade", "Upgrade: websocket",
                        "Sec-WebSocket-Accept: " + accept_response]
     handler.stitch(responseHeaders)
     serve(handler)
