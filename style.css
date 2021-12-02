@@ -1,0 +1,22 @@
+.feed {
+    width: 70vw;
+    background-color: gainsboro;
+    color: black;
+}
+
+.onlineList {
+    background-color: cornflowerblue;
+    color: white;
+    width: 30vw;
+}
+
+.feed > h2 {
+    text-align: center;
+}
+
+.feedItem {
+}
+
+.onlineList > h2 {
+    text-align: center;
+}
