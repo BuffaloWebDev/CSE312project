@@ -9,7 +9,7 @@ from hashlib import sha256
 
 files = ["style.css", "functions.js"]
 
-redirects = {"/" : "/login"}
+redirects = {"/": "/login"}
 
 
 def route(requestHeaders, requestBody, requestType, requestPath, handler):
@@ -22,12 +22,14 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
         elif requestPath in redirects:
             handler.redirect(redirects[requestPath])
 
-        elif requestPath == "/websocket" and "Upgrade" in requestHeaders['Connection'] and "websocket" in requestHeaders['Upgrade']:
+        elif requestPath == "/websocket" and "Upgrade" in requestHeaders[
+            'Connection'] and "websocket" in requestHeaders['Upgrade']:
             randKey = requestHeaders['Sec-WebSocket-Key'][0]
             websocket.establish(handler, randKey)
 
         else:
-            authToken = cookies.get("auth-token") if cookies is not None and "auth-token" in cookies else None
+            authToken = cookies.get(
+                "auth-token") if cookies is not None and "auth-token" in cookies else None
 
             if not accounts.checkAuthToken(authToken):
                 handler.denied()
@@ -35,13 +37,23 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
             if requestPath == "/home":
                 home.serveHome(handler)
 
+            elif requestPath == "/newPost":
+                home.newPostPage(handler)
+
             elif requestPath[1:] in files:  # public files
-                with open(requestPath[1:], "rb") as requestedFile:
+                with open(f"resources{requestPath}", "rb") as requestedFile:
                     responseBody = requestedFile.read()
                 extension = requestPath[1:].split(".")[-1]
                 handler.sendMessage(responseBody, extension)
 
             else:
+                uploadedImages = [item["filename"] for item in database.get_feed()]
+
+                if requestPath[1:] in uploadedImages:
+                    with open(f"resources/uploadedImages{requestPath}", "rb") as f:
+                        responseBody = f.read()
+                    handler.sendMessage(responseBody, "jpg")
+
                 handler.notFound()
 
         # TODO Add routes for each page in the website with their own .py files (keep it modular)
@@ -72,21 +84,26 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
                 username = form.get("username").decode()
                 pwd = form.get("password")
 
-
-                responseBody = accounts.login(username, pwd) if requestPath == "/login" else accounts.register(username, pwd)
-                print(responseBody, flush=True)
+                responseBody = accounts.login(username, pwd) if requestPath == "/login" \
+                    else accounts.register(username, pwd)
 
                 if responseBody == "You logged in":
                     token = utils.token()
                     hashed = utils.hash(token)
 
                     database.changeAuthToken(username, token)
-                    responseHeaders = [utils.cType["plain"], utils.nosniff, utils.contentLength(len(responseBody))]
-                    responseHeaders.append(utils.setCookie("auth-token", token, ["Max-Age = 3600", "HttpOnly"]))
+                    responseHeaders = [utils.cType["plain"], utils.nosniff,
+                                       utils.contentLength(len(responseBody))]
+                    responseHeaders.append(
+                        utils.setCookie("auth-token", token, ["Max-Age = 3600", "HttpOnly"]))
+
+                    accounts.addOnlineUser(username, handler)
+
                     handler.stitch(200, responseHeaders, responseBody)
                 else:
                     handler.sendMessage(responseBody)
-
+            elif requestPath == "/newPost":
+                home.newPostSubmission(handler, cookies, form)
 
     elif requestType == "PUT":
         if requestPath[:7] == "/users/":
@@ -106,7 +123,7 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
             userID = requestPath[7:]
 
             if database.user_exists(userID):
-                #database.removeUser(userID)
+                # database.removeUser(userID)
                 handler.stitch([status[204]])
             else:
                 handler.notFound()

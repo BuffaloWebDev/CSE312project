@@ -7,8 +7,8 @@ import utils
 from bcrypt import hashpw, checkpw, gensalt
 
 def loginPage(handler):
-    with open("login.html") as f:
-        responseBody = f.read().encode()
+    with open("resources/login.html", "rb") as f:
+        responseBody = f.read()
 
     xsrf = utils.token().encode()
     utils.addToken(xsrf)
@@ -52,3 +52,25 @@ def checkAuthToken(token):
 
     user = database.fetch_account_by_token(token)
     return user is not None
+
+
+clients = []
+
+
+def getOnlineUsers():
+    return clients
+
+def getUserByHandler(handler):
+    for client in clients:
+        if client["handler"] == handler:
+            return client
+
+def addOnlineUser(username, handler):
+    clients.append({
+        "username": username,
+        "handler": handler
+    })
+
+def removeOnlineUser(handler):
+    clients = [client for client in clients if client["handler"] != handler]
+

@@ -55,6 +55,9 @@ def escapeHTML(byteString):
 
 
 def template(file, replacements):
+    if isinstance(file, str):
+        file = file.encode()
+
     for i in replacements:
         old = i[0]
         new = i[1]
@@ -77,6 +80,7 @@ def token():
 
 
 tokens = []
+
 
 def tokenCheck(token):
     return token in tokens

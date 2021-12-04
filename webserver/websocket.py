@@ -9,11 +9,8 @@ import database
 import routes
 import webserver
 
-clients = []
-
 
 def establish(handler, randKey):
-    addClient(handler)
 
     key = (randKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()
     accept_response = b64encode(sha1(key).digest()).strip().decode("ASCII")
@@ -23,19 +20,6 @@ def establish(handler, randKey):
     serve(handler)
 
 
-def addClient(handler):
-    clients.append({"handler": handler, "client": handler.client_address})
-
-
-def removeClient(handler):
-    i = 0
-    while i < len(clients):
-        if clients[i]["handler"] == handler:
-            break
-        i += 1
-    clients.pop(i)
-
-
 def serve(handler):
     while True:
         incomingMessage = bytearray(handler.request.recv(1024).strip())
@@ -43,9 +27,8 @@ def serve(handler):
             responseBody = getPayload(incomingMessage)
 
             if responseBody == "Close Connection":
-                removeClient(handler)
+                accounts.removeOnlineUser(handler)
                 break
-
 
 
 def getPayload(incomingMessage):
@@ -109,7 +92,7 @@ def prepareHeaders(payload):
 
 def sendToAll(headers, body):
     message = headers + body
-    for client in clients:
+    for client in accounts.getOnlineUsers():
         client['handler'].send(message)
 
 

@@ -13,9 +13,9 @@
 			
 			<div style = "float:right">
 				<div class = "inline-button"> 
-					<a href="#"> Button 1</a>
-	    				<a href="#"> Button 2</a>
-	  				<a href="#"> Button 3</a>
+					<a href="/newPost"> Create a Post</a>
+					<a href="#"> Button 2</a>
+	  				<a href="/dm"> Direct Messages</a>
 				</div>
 			</div>
 		</div>
@@ -24,10 +24,13 @@
 <div style="display: flex">
 <div class = "feed">
 <h2>Feed</h2>
-	{{feed}}
+	{{Feed}}
 </div>
 <div class="onlineList">
 <h2>Online Users</h2>
+	<div class = "innerContainer">
+		{{OnlineUsers}}
+	</div>
 </div>
 
 </div>

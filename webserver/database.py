@@ -9,6 +9,7 @@ db = client["database"]
 accounts = db["accounts"]
 messages = db["messages"]
 feed = db["feed"]
+#feed.drop()
 
 # TODO Add unique ID for each account
 def add_account(name, password):
@@ -38,7 +39,8 @@ def fetch_account_by_id(id):
 
 def fetch_account_by_token(token):
     hashed = hash(token)
-    return accounts.find_one({"token": token})
+    account = accounts.find_one({"token": token})
+    return account["name"]
 
 
 def user_exists(id):
@@ -59,15 +61,19 @@ def add_message(sender, to, message):
     messages.insert_one(post)
 
 
-def add_feed(sender, post, caption):
+def add_feed(sender, filename, caption):
     post = {
             "from": sender,
-            "post": post,
+            "filename": filename,
             "caption": caption,
             "timestamp": time.time()
         }
     feed.insert_one(post)
 
-
 def get_feed():
     return feed.find({})
+
+def numberOfFeedItems():
+    return len(list(get_feed()))
+
+
