@@ -8,42 +8,39 @@ newline = "\r\n"
 skipLine = "\r\n\r\n"
 
 
-
 class WebServer(socketserver.StreamRequestHandler):
 
 
     def send(self, message):
         self.request.sendall(message)
 
-    def stitch(self, headerList, body=b''):
+    def stitch(self, code=200, headerList=[], body=b''):
         if isinstance(body, int):
             body = str(body)
         if isinstance(body, str):
             body = body.encode()
-        print(headerList, flush=True)
 
-        response = utils.makeHeader(headerList)
-        print(response, flush=True)
+        response = utils.makeHeader(code, headerList)
         response += body
         self.send(response)
 
 
-    def redirect(self, location):
-        responseHeaders = [utils.status[301], "Location: " + location, utils.contentLength(0)]
-        self.stitch(responseHeaders)
+    def redirect(self, location, msg=""):
+        responseHeaders = ["Location: " + location, utils.contentLength(0)]
+        self. stitch(301, responseHeaders)
 
 
-    def sendMessage(self, msg, code, contentType):
-        responseHeaders = [utils.status[code], utils.cType[contentType], utils.nosniff, utils.contentLength(len(msg))]
-        self.stitch(responseHeaders, msg)
+    def sendMessage(self, msg, contentType="plain", code=200):
+        responseHeaders = [utils.cType[contentType], utils.nosniff, utils.contentLength(len(msg))]
+        self.stitch(code, responseHeaders, msg)
 
 
     def notFound(self):
-        self.sendMessage(b"Content not found", 404, "plain")
+        self.sendMessage(b"Content not found", code=404)
 
 
     def denied(self):
-        self.sendMessage(b"Request has been denied", 403, "plain")
+        self.sendMessage(b"Request has been denied", code=403)
 
 
     def handle(self):

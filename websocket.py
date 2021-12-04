@@ -109,7 +109,6 @@ def prepareHeaders(payload):
 
 def sendToAll(headers, body):
     message = headers + body
-    print(message)
     for client in clients:
         client['handler'].send(message)
 

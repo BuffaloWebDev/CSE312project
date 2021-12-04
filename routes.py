@@ -5,30 +5,48 @@ import parse
 import home
 import accounts
 
+from hashlib import sha256
+
 files = ["style.css", "functions.js"]
+
+redirects = {"/" : "/login"}
 
 
 def route(requestHeaders, requestBody, requestType, requestPath, handler):
+    cookies = parse.cookies(requestHeaders["Cookie"]) if "Cookie" in requestHeaders else None
 
     if requestType == "GET":
-        if requestPath == "/":
-            home.serveHome(handler)
+        if requestPath == "/login":
+            accounts.loginPage(handler)
+
+        elif requestPath in redirects:
+            handler.redirect(redirects[requestPath])
 
         elif requestPath == "/websocket" and "Upgrade" in requestHeaders['Connection'] and "websocket" in requestHeaders['Upgrade']:
             randKey = requestHeaders['Sec-WebSocket-Key'][0]
             websocket.establish(handler, randKey)
 
-        elif requestPath[1:] in files:  # public files
-            with open(requestPath[1:], "rb") as requestedFile:
-                responseBody = requestedFile.read()
-            extension = requestPath[1:].split(".")[-1]
-            handler.sendMessage(responseBody, 200, extension)
+        else:
+            authToken = cookies.get("auth-token") if cookies is not None and "auth-token" in cookies else None
 
+            if not accounts.checkAuthToken(authToken):
+                handler.denied()
+
+            if requestPath == "/home":
+                home.serveHome(handler)
+
+            elif requestPath[1:] in files:  # public files
+                with open(requestPath[1:], "rb") as requestedFile:
+                    responseBody = requestedFile.read()
+                extension = requestPath[1:].split(".")[-1]
+                handler.sendMessage(responseBody, extension)
+
+            else:
+                handler.notFound()
 
         # TODO Add routes for each page in the website with their own .py files (keep it modular)
 
-        else:
-            handler.notFound()
+
 
     elif requestType == "POST":
         if requestPath == "/users":
@@ -46,16 +64,29 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
             form = parse.form(requestBody, delimiter)
 
             token = form.get('xsrf_token')
-
-            if not index.tokenCheck(token):
+            if not utils.tokenCheck(token):
                 handler.denied()
+                return
 
-            elif requestPath == "/comment":
-                username = utils.escapeHTML(form['name'])
-                submission = utils.escapeHTML(form['comment'])
+            if requestPath == "/login" or requestPath == "/register":
+                username = form.get("username").decode()
+                pwd = form.get("password")
 
-                index.addComment({"name": username, "comment": submission})
-                handler.redirect("/")
+
+                responseBody = accounts.login(username, pwd) if requestPath == "/login" else accounts.register(username, pwd)
+                print(responseBody, flush=True)
+
+                if responseBody == "You logged in":
+                    token = utils.token()
+                    hashed = utils.hash(token)
+
+                    database.changeAuthToken(username, token)
+                    responseHeaders = [utils.cType["plain"], utils.nosniff, utils.contentLength(len(responseBody))]
+                    responseHeaders.append(utils.setCookie("auth-token", token, ["Max-Age = 3600", "HttpOnly"]))
+                    handler.stitch(200, responseHeaders, responseBody)
+                else:
+                    handler.sendMessage(responseBody)
+
 
     elif requestType == "PUT":
         if requestPath[:7] == "/users/":

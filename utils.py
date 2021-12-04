@@ -2,6 +2,7 @@
 # Useful little functions that don't do much
 
 from secrets import token_urlsafe
+from hashlib import sha256
 
 newLine = "\r\n"
 nosniff = "X-Content-Type-Options: nosniff"
@@ -35,17 +36,14 @@ def contentLength(length):
 
 # Creates HTTP header, complete with double CRLF at end.
 # Must have status code as first header, but no requirements beyond that
-def makeHeader(headers):
-    header = "HTTP/1.1 "
-    for line in headers:
+def makeHeader(code, otherHeaders):
+    header = f"HTTP/1.1 {status[code]} {newLine}"
+    for line in otherHeaders:
         if isinstance(line, int):
             line = str(line)
-        print(line, flush=True)
-
         header += (line + newLine)
     header += newLine
-
-    return header.encode('ASCII')
+    return header.encode("ASCII")
 
 
 def escapeHTML(byteString):
@@ -65,14 +63,41 @@ def template(file, replacements):
             new = str(new)
 
         if isinstance(new, str):
-            new = new.encode("UTF-8")
+            new = new.encode()
 
         if isinstance(old, str):
-            old = old.encode("UTF-8")
+            old = old.encode()
 
         file = file.replace(old, new)
     return file
 
 
 def token():
-    return token_urlsafe(64).encode("UTF-8")
+    return token_urlsafe(64)
+
+
+tokens = []
+
+def tokenCheck(token):
+    return token in tokens
+
+
+def addToken(token):
+    tokens.append(token)
+
+
+def hash(key):
+    if isinstance(key, str):
+        key = key.encode()
+
+    return sha256(key).digest()
+
+
+def setCookie(name, value, directives=None):
+    if isinstance(value, int):
+        value = str(value)
+
+    cookie = f"Set-Cookie: {name}={value}"
+    for directive in directives:
+        cookie += f"; {directive}"
+    return cookie
