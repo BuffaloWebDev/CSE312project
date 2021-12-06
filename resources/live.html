@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Interaction</title>
+</head>
+
+<body>
+    <div>
+        <a href="/home">Homepage</a>
+        <a href="/newPost"> Create a Post</a>
+        <a href="/dm"> Direct Messages</a>
+
+        <h2>Color Picker</h2>
+
+        <table>
+            <tbody>
+                <tr>
+                    <th>Red</th>
+                    <th>Green</th>
+                    <th>Blue</th>
+                </tr>
+                <tr>
+                    <td id="vr">255</td>
+                    <td id="vg">255</td>
+                    <td id="vb">255</td>
+                </tr>
+                <td>
+                    <input oninput="cr(this.value)" id="vrr" onchange="cr(this.value)" type="range" min="0" max="255"
+                        value="255">
+                </td>
+                <td>
+                    <input oninput="cg(this.value)" id="vgg" onchange="cg(this.value)" type="range" min="0" max="255"
+                        value="255">
+                </td>
+                <td>
+                    <input oninput="cb(this.value)" id="vbb" onchange="cb(this.value)" type="range" min="0" max="255"
+                        value="255">
+                </td>
+            </tbody>
+        </table>
+
+        <p id="announce">Color: #ffffff</p>
+        <p id="picked-by">Picked by: Nobody</p>
+        <input value="{{userName}}" id="current-userName" hidden>
+
+
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+        socket = new WebSocket('ws://' + window.location.host + '/websocket');
+        socket.onmessage = parseMessage;
+        let current_user = $('#current-userName').val();
+
+        function cr(value) {
+            $('#vr').html(value);
+            ca();
+        };
+
+        function cg(value) {
+            $('#vg').html(value);
+            ca();
+        };
+
+        function cb(value) {
+            $('#vb').html(value);
+            ca();
+        };
+
+        const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
+            const hex = x.toString(16)
+            return hex.length === 1 ? '0' + hex : hex
+        }).join('')
+
+        function ca() {
+            var r = $('#vr').html();
+            var g = $('#vg').html();
+            var b = $('#vb').html();
+            socket.send(JSON.stringify({
+                'from': current_user,
+                'r': r,
+                'g': g,
+                'b': b
+            }));
+        };
+
+        function parseMessage(message) {
+            const msgData = JSON.parse(message.data);
+            let color = `rgb(${msgData.r},${msgData.g},${msgData.b})`;
+            document.body.style.backgroundColor = color;
+            $('#vr').html(msgData.r);
+            $('#vg').html(msgData.g);
+            $('#vb').html(msgData.b);
+            $('#vrr').val(msgData.r);
+            $('#vgg').val(msgData.g);
+            $('#vbb').val(msgData.b);
+            $('#vrr').attr('value', msgData.r);
+            $('#vgg').attr('value', msgData.g);
+            $('#vbb').attr('value', msgData.b);
+            $('#announce').html(`Color: ${rgbToHex(parseInt(msgData.r), parseInt(msgData.g), parseInt(msgData.b))}`);
+            $('#picked-by').html(`Picked by: ${msgData.from}`);
+        };
+
+
+    </script>
+</body>
+
+</html>
