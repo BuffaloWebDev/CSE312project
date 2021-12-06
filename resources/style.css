@@ -1,0 +1,43 @@
+.feed {
+    width: 70vw;
+    background-color: gainsboro;
+    color: black;
+}
+
+.onlineList {
+    background-color: cornflowerblue;
+    color: white;
+    width: 30vw;
+}
+
+.innerContainer {
+  padding-left: 25%;
+  padding-bottom: 50px;
+  text-align: left;
+  font-size: x-large;
+}
+
+
+.feed > h2 {
+    text-align: center;
+}
+
+.feedItem {
+    width: 100%;
+}
+
+.feedItem > p {
+ padding-left: 2vw;
+}
+
+
+.feedItem > img {
+    max-width: 70vw;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.onlineList > h2 {
+    text-align: center;
+}

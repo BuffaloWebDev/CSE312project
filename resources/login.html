@@ -1,0 +1,32 @@
+<html>
+<head>
+    <title>CSE312 Login Page</title>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+</head>
+<body>
+
+    <h1>Login:</h1>
+
+    <form action="/login" id="login-form" method="post" enctype="multipart/form-data">
+        <input value = {{XSRFToken}} name = "xsrf_token" hidden>
+        <label for="loginUsername">Username: </label>
+        <input id="loginUsername" type="text" name="username" required><br/>
+        <label for="loginPassword">Password: </label>
+        <input id="loginPassword" type="password" name="password" required> <br/>
+        <input type="submit" value="Submit">
+     </form>
+
+    <h2>Don't have an account? Register Here:</h2>
+
+    <form action="/register" id="register-form" method="post" enctype="multipart/form-data">
+        <input value = {{XSRFToken}} name = "xsrf_token" hidden>
+        <label for="registerUsername">Username: </label>
+        <input id="registerUsername" type="text" name="username" required><br/>
+        <label for="registerPassword">Password: </label>
+        <input id="registerPassword" type="password" name="password" required> <br/>
+        <input type="submit" value="Submit">
+     </form>
+
+</body>
+
+</html>
