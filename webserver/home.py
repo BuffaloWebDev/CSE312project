@@ -57,6 +57,21 @@ def dmPage(handler, authToken):
 
     handler.sendMessage(responseBody, "html")
 
+def livePage(handler, authToken):
+    if not checkAuthToken(authToken):
+        print("Auth token broken", flush=True)
+        handler.denied()
+
+    username = fetch_account_by_token(authToken)
+
+    with open(f"resources/live.html", "rb") as requestedFile:
+        responseBody = requestedFile.read()
+
+    replacements = [("{{userName}}", username)]
+    responseBody = template(responseBody, replacements)
+
+    handler.sendMessage(responseBody, "html")
+
 def newPostSubmission(handler, cookies, form):
     authToken = cookies.get("auth-token") if cookies is not None and "auth-token" in cookies else None
 

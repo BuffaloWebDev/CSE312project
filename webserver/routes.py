@@ -43,6 +43,9 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
             elif requestPath == "/dm":
                 home.dmPage(handler, authToken)
 
+            elif requestPath == "/live":
+                home.livePage(handler, authToken)
+
             elif requestPath[1:] in files:  # public files
                 with open(f"resources{requestPath}", "rb") as requestedFile:
                     responseBody = requestedFile.read()
@@ -95,6 +98,7 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
                     hashed = utils.hash(token)
 
                     database.changeAuthToken(username, token)
+                    # responseBody = '<html><body><a href="/home">Homepage</a><a href="/newPost"> Create a Post</a><a href="/dm"> Direct Messages</a><br>f{responseBody}</body></html>'
                     responseHeaders = [utils.cType["plain"], utils.nosniff,
                                        utils.contentLength(len(responseBody))]
                     responseHeaders.append(
