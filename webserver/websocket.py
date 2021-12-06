@@ -8,27 +8,36 @@ import utils
 import database
 import routes
 import webserver
+import accounts
 
+all_sockets = []
 
 def establish(handler, randKey):
 
     key = (randKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()
     accept_response = b64encode(sha1(key).digest()).strip().decode("ASCII")
-    responseHeaders = [utils.status[101], "Connection: Upgrade", "Upgrade: websocket",
+    responseHeaders = ["Connection: Upgrade", "Upgrade: websocket", "X-Content-Type-Options: nosniff",
                        "Sec-WebSocket-Accept: " + accept_response]
-    handler.stitch(responseHeaders)
+    handler.stitch(101, responseHeaders)
     serve(handler)
 
 
 def serve(handler):
+    all_sockets.append(handler)
     while True:
         incomingMessage = bytearray(handler.request.recv(1024).strip())
         if incomingMessage != b'':
             responseBody = getPayload(incomingMessage)
-
             if responseBody == "Close Connection":
                 accounts.removeOnlineUser(handler)
                 break
+            headers = prepareHeaders(responseBody)
+            for a_socket in all_sockets:
+                try:
+                    a_socket.request.sendall(headers + bytearray(responseBody))
+                except:
+                    pass
+            # sendToAll(headers, bytearray(responseBody))
 
 
 def getPayload(incomingMessage):
@@ -39,7 +48,7 @@ def getPayload(incomingMessage):
 
     if opcode == 8:
         return "Close Connection"
-    
+
     secondByte = incomingMessage[1]
 
     mask = secondByte >> 7

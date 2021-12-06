@@ -40,6 +40,9 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
             elif requestPath == "/newPost":
                 home.newPostPage(handler)
 
+            elif requestPath == "/dm":
+                home.dmPage(handler, authToken)
+
             elif requestPath[1:] in files:  # public files
                 with open(f"resources{requestPath}", "rb") as requestedFile:
                     responseBody = requestedFile.read()
@@ -100,6 +103,7 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
                     accounts.addOnlineUser(username, handler)
 
                     handler.stitch(200, responseHeaders, responseBody)
+                    # handler.redirect("/home")
                 else:
                     handler.sendMessage(responseBody)
             elif requestPath == "/newPost":
@@ -124,7 +128,7 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
 
             if database.user_exists(userID):
                 # database.removeUser(userID)
-                handler.stitch([status[204]])
+                handler.stitch([utils.status[204]])
             else:
                 handler.notFound()
         else:
