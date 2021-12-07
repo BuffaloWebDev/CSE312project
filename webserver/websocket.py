@@ -12,12 +12,13 @@ import accounts
 
 all_sockets = []
 
+
 def establish(handler, randKey):
 
-    key = (randKey + "258EAFA5-E914-47DA-95CA-C5AB0DC85B11").encode()
+    key = f"{randKey}258EAFA5-E914-47DA-95CA-C5AB0DC85B11".encode()
     accept_response = b64encode(sha1(key).digest()).strip().decode("ASCII")
-    responseHeaders = ["Connection: Upgrade", "Upgrade: websocket", "X-Content-Type-Options: nosniff",
-                       "Sec-WebSocket-Accept: " + accept_response]
+    responseHeaders = ["Connection: Upgrade", "Upgrade: websocket", utils.nosniff,
+                       f"Sec-WebSocket-Accept: {accept_response}"]
     handler.stitch(101, responseHeaders)
     serve(handler)
 
@@ -37,7 +38,6 @@ def serve(handler):
                     a_socket.request.sendall(headers + bytearray(responseBody))
                 except:
                     pass
-            # sendToAll(headers, bytearray(responseBody))
 
 
 def getPayload(incomingMessage):
