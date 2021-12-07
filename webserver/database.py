@@ -18,7 +18,7 @@ def add_account(name, password):
         account = {
                 "name": name,
                 "password": password,
-                "token": null
+                "token": None
             }
         accounts.insert_one(account)
         return "Registration successful"

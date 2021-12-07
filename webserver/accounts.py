@@ -72,5 +72,6 @@ def addOnlineUser(username, handler):
     })
 
 def removeOnlineUser(handler):
+    global clients
     clients = [client for client in clients if client["handler"] != handler]
 

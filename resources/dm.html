@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Direct Messaging</title>
+</head>
+
+<body>
+    <div class="onlineList">
+        <a href="/home">Homepage</a>
+        <a href="/newPost"> Create a Post</a>
+        <a href="/live"> Live Interaction</a>
+        <h2>Direct Messaging</h2>
+        <div class="innerContainer">
+            <select name="dm" id="dm-people">
+                {{OnlineUsers}}
+            </select>
+            <input value="{{userName}}" id="current-userName" hidden>
+            <input type="text" id="text-msg">
+            <button id="send-msg">Send</button>
+        </div>
+        <div id="reply-section">
+
+        </div>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script>
+        socket = new WebSocket('ws://' + window.location.host + '/websocket');
+        socket.onmessage = parseMessage;
+
+        $(document).on('click', '#send-msg', () => {
+            let picked_user = $('#dm-people').find(":selected").val();
+            let msg_value = $('#text-msg').val();
+            let current_user = $('#current-userName').val();
+            // console.log(picked_user, msg_value, current_user);
+            if (picked_user !== '' && msg_value !== '' && current_user !== '') {
+                socket.send(JSON.stringify({
+                    'from': current_user,
+                    'to': picked_user,
+                    'msg': msg_value
+                }));
+                $('#text-msg').val("");
+            };
+        });
+
+        function replyMsg(from) {
+            let msg_value = $('#reply-msg').val();
+            let current_user = $('#current-userName').val();
+            if (from !== '' && msg_value !== '' && current_user !== '') {
+                socket.send(JSON.stringify({
+                    'from': current_user,
+                    'to': from,
+                    'msg': msg_value
+                }));
+                $('#reply-section').html("");
+            };
+        };
+
+        function parseMessage(message) {
+            const msgData = JSON.parse(message.data);
+            console.log(msgData);
+            let current_user = $('#current-userName').val();
+            if (msgData['to'] == current_user) {
+                $('#reply-section').html(
+                    `
+                        <p>${msgData["from"]}: ${msgData["msg"]}</p>
+                        <input type="text" id="reply-msg">
+                        <button id="reply-msg" onclick="replyMsg('${msgData["from"]}')">Reply</button>
+                    `
+                );
+            };
+        }
+    </script>
+</body>
+
+</html>

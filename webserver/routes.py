@@ -40,6 +40,12 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
             elif requestPath == "/newPost":
                 home.newPostPage(handler)
 
+            elif requestPath == "/dm":
+                home.dmPage(handler, authToken)
+
+            elif requestPath == "/live":
+                home.livePage(handler, authToken)
+
             elif requestPath[1:] in files:  # public files
                 with open(f"resources{requestPath}", "rb") as requestedFile:
                     responseBody = requestedFile.read()
@@ -55,10 +61,6 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
                     handler.sendMessage(responseBody, "jpg")
 
                 handler.notFound()
-
-        # TODO Add routes for each page in the website with their own .py files (keep it modular)
-
-
 
     elif requestType == "POST":
         if requestPath == "/users":
@@ -92,6 +94,7 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
                     hashed = utils.hash(token)
 
                     database.changeAuthToken(username, token)
+
                     responseHeaders = [utils.cType["plain"], utils.nosniff,
                                        utils.contentLength(len(responseBody))]
                     responseHeaders.append(
@@ -117,15 +120,5 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
             else:
                 handler.notFound()
 
-    # TODO Implement in database
-    elif requestType == "DELETE":
-        if requestPath[:7] == "/users/":
-            userID = requestPath[7:]
-
-            if database.user_exists(userID):
-                # database.removeUser(userID)
-                handler.stitch([status[204]])
-            else:
-                handler.notFound()
-        else:
-            print("Error, request type not recognized")
+    else:
+        print("Error, request type not recognized")
