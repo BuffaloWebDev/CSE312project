@@ -49,63 +49,8 @@
 
 
     </div>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script>
-        socket = new WebSocket('ws://' + window.location.host + '/websocket');
-        socket.onmessage = parseMessage;
-        let current_user = $('#current-userName').val();
-
-        function cr(value) {
-            $('#vr').html(value);
-            ca();
-        };
-
-        function cg(value) {
-            $('#vg').html(value);
-            ca();
-        };
-
-        function cb(value) {
-            $('#vb').html(value);
-            ca();
-        };
-
-        const rgbToHex = (r, g, b) => '#' + [r, g, b].map(x => {
-            const hex = x.toString(16)
-            return hex.length === 1 ? '0' + hex : hex
-        }).join('')
-
-        function ca() {
-            var r = $('#vr').html();
-            var g = $('#vg').html();
-            var b = $('#vb').html();
-            socket.send(JSON.stringify({
-                'from': current_user,
-                'r': r,
-                'g': g,
-                'b': b
-            }));
-        };
-
-        function parseMessage(message) {
-            const msgData = JSON.parse(message.data);
-            let color = `rgb(${msgData.r},${msgData.g},${msgData.b})`;
-            document.body.style.backgroundColor = color;
-            $('#vr').html(msgData.r);
-            $('#vg').html(msgData.g);
-            $('#vb').html(msgData.b);
-            $('#vrr').val(msgData.r);
-            $('#vgg').val(msgData.g);
-            $('#vbb').val(msgData.b);
-            $('#vrr').attr('value', msgData.r);
-            $('#vgg').attr('value', msgData.g);
-            $('#vbb').attr('value', msgData.b);
-            $('#announce').html(`Color: ${rgbToHex(parseInt(msgData.r), parseInt(msgData.g), parseInt(msgData.b))}`);
-            $('#picked-by').html(`Picked by: ${msgData.from}`);
-        };
-
-
-    </script>
+   <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script> -->
+    <script src = live.js></script>
 </body>
 
 </html>

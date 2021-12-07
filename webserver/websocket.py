@@ -23,21 +23,33 @@ def establish(handler, randKey):
 
 
 def serve(handler):
+
     all_sockets.append(handler)
     while True:
-        incomingMessage = bytearray(handler.request.recv(1024).strip())
+        incomingMessage = bytearray(handler.request.recv(2048).strip())
         if incomingMessage != b'':
-            responseBody = getPayload(incomingMessage)
-            if responseBody == "Close Connection":
+            responseBody = getPayload(incomingMessage).decode()
+            if responseBody == "Close Connection" or responseBody == b"Close Connection":
+                #all_sockets.remove(handler)
                 accounts.removeOnlineUser(handler)
                 break
+            if responseBody[-1:] != "}":
+                responseBody += "}"
+            if responseBody[-2:] != '"':
+                responseBody = responseBody[:-2] + '"' + responseBody[-1:]
+
+            responseBody = parse.decodeJSON(responseBody)
+            if "msg" in responseBody:
+                responseBody["msg"] = utils.escapeHTML(responseBody["msg"].encode()).decode()
+            if "from" in responseBody:
+                responseBody["from"] = utils.escapeHTML(responseBody["from"].encode()).decode()
+            if "to" in responseBody:
+                responseBody["to"] = utils.escapeHTML(responseBody["to"].encode()).decode()
+
+            responseBody = parse.encodeJSON(responseBody)
+
             headers = prepareHeaders(responseBody)
-            for a_socket in all_sockets:
-                try:
-                    a_socket.request.sendall(headers + bytearray(responseBody))
-                except:
-                    pass
-            # sendToAll(headers, bytearray(responseBody))
+            sendToAll(headers, responseBody)
 
 
 def getPayload(incomingMessage):
@@ -47,7 +59,7 @@ def getPayload(incomingMessage):
     opcode = firstByte & 0b00001111
 
     if opcode == 8:
-        return "Close Connection"
+        return b"Close Connection"
 
     secondByte = incomingMessage[1]
 
@@ -101,8 +113,11 @@ def prepareHeaders(payload):
 
 def sendToAll(headers, body):
     message = headers + body
-    for client in accounts.getOnlineUsers():
-        client['handler'].send(message)
+    for socket in all_sockets:
+        try:
+            socket.request.sendall(message)
+        except:
+            pass
 
 
 def getNextBytes(message, n, currByte):

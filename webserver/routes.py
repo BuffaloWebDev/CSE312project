@@ -5,15 +5,13 @@ import parse
 import home
 import accounts
 
-from hashlib import sha256
-
-files = ["style.css", "functions.js"]
-
 redirects = {"/": "/login"}
+
+files = ["/style.css", "/live.js", "/dm.js"]
 
 
 def route(requestHeaders, requestBody, requestType, requestPath, handler):
-    cookies = parse.cookies(requestHeaders["Cookie"]) if "Cookie" in requestHeaders else None
+    cookies = parse.cookies(requestHeaders.get("Cookie"))
 
     if requestType == "GET":
         if requestPath == "/login":
@@ -27,15 +25,21 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
             randKey = requestHeaders['Sec-WebSocket-Key'][0]
             websocket.establish(handler, randKey)
 
+        elif requestPath in files: # Public files (css and js)
+            with open(f"resources{requestPath}", "rb") as requestedFile:
+                responseBody = requestedFile.read()
+            extension = requestPath.split(".")[-1]
+            handler.sendMessage(responseBody, extension)
+
         else:
             authToken = cookies.get(
                 "auth-token") if cookies is not None and "auth-token" in cookies else None
 
             if not accounts.checkAuthToken(authToken):
-                handler.denied()
+                handler.redirect("/login")
 
             if requestPath == "/home":
-                home.serveHome(handler)
+                home.serveHome(handler, authToken)
 
             elif requestPath == "/newPost":
                 home.newPostPage(handler)
@@ -45,12 +49,6 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
 
             elif requestPath == "/live":
                 home.livePage(handler, authToken)
-
-            elif requestPath[1:] in files:  # public files
-                with open(f"resources{requestPath}", "rb") as requestedFile:
-                    responseBody = requestedFile.read()
-                extension = requestPath[1:].split(".")[-1]
-                handler.sendMessage(responseBody, extension)
 
             else:
                 uploadedImages = [item["filename"] for item in database.get_feed()]
@@ -64,10 +62,7 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
 
     elif requestType == "POST":
         if requestPath == "/users":
-            requestBody = parse.decodeJSON(requestBody)
-            # TODO Update args
-            responseBody = parse.encodeJSON(database.add_account())
-            handler.sendMessage(responseBody, 201, "js")
+            pass
 
         else:
             length = int(requestHeaders['Content-Length'][0])
@@ -93,32 +88,25 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
                     token = utils.token()
                     hashed = utils.hash(token)
 
-                    database.changeAuthToken(username, token)
+                    database.changeAuthToken(username, hashed)
 
-                    responseHeaders = [utils.cType["plain"], utils.nosniff,
-                                       utils.contentLength(len(responseBody))]
-                    responseHeaders.append(
-                        utils.setCookie("auth-token", token, ["Max-Age = 3600", "HttpOnly"]))
+                    responseHeaders = [utils.setCookie("auth-token", token, ["Max-Age = 3600", "HttpOnly"])]
 
                     accounts.addOnlineUser(username, handler)
-
-                    handler.stitch(200, responseHeaders, responseBody)
+                    handler.redirect("/home", responseHeaders)
                 else:
                     handler.sendMessage(responseBody)
             elif requestPath == "/newPost":
                 home.newPostSubmission(handler, cookies, form)
+            elif requestPath == "/greeting":
+                authToken = cookies.get("auth-token") \
+                    if cookies is not None and "auth-token" in cookies else None
 
-    elif requestType == "PUT":
-        if requestPath[:7] == "/users/":
-            userID = requestPath[7:]
-            form = parse.decodeJSON(requestBody)
-
-            if database.userExists(userID):
-                # TODO Add args to database.update_account()
-                updatedUser = database.update_account()
-                handler.sendMessage(parse.encodeJSON(updatedUser), 200, "js")
-            else:
-                handler.notFound()
+                username = database.fetch_account_by_token(utils.hash(authToken))
+                greeting = form.get("greeting")
+                if greeting is not None and username is not None:
+                    database.changeGreeting(username, greeting)
+                handler.redirect("/home")
 
     else:
         print("Error, request type not recognized")
