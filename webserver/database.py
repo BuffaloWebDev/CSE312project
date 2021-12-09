@@ -1,7 +1,7 @@
 import time
 from pymongo import MongoClient
 
-from utils import hash
+from utils import hash, escapeHTML
 
 """A mongo database that maintains accounts, messages, and feed."""
 client = MongoClient(host="mongo", port=27017)
@@ -10,6 +10,7 @@ accounts = db["accounts"]
 messages = db["messages"]
 feed = db["feed"]
 #feed.drop()
+#accounts.drop()
 
 # TODO Add unique ID for each account
 def add_account(name, password):
@@ -18,12 +19,14 @@ def add_account(name, password):
         account = {
                 "name": name,
                 "password": password,
-                "token": None
+                "token": None,
+                "greeting": "Hello there!"
             }
         accounts.insert_one(account)
         return "Registration successful"
     else:
         return f"{name} already exists in database."
+
 
 def changeAuthToken(user, token):
     accounts.find_one_and_update({"name": user}, {"$set":{"token": token}})
@@ -33,18 +36,16 @@ def fetch_account(name):
     return accounts.find_one({"name": name})
 
 
-def fetch_account_by_id(id):
-    return accounts.find_one({"id": id})
-
-
 def fetch_account_by_token(token):
+    if isinstance(token, str):
+        token = token.encode()
+
+    print(token, flush=True)
+    print(type(token), flush=True)
     hashed = hash(token)
-    account = accounts.find_one({"token": token})
-    return account["name"]
-
-
-def user_exists(id):
-    return fetch_account_by_id(id) is not None
+    account = accounts.find_one({"token": hashed})
+    if account is not None:
+        return account["name"]
 
 
 def fetch_accounts():
@@ -70,10 +71,24 @@ def add_feed(sender, filename, caption):
         }
     feed.insert_one(post)
 
+
 def get_feed():
     return feed.find({})
 
+
 def numberOfFeedItems():
     return len(list(get_feed()))
+
+
+def changeGreeting(user, greeting):
+    greeting = escapeHTML(greeting)
+    accounts.find_one_and_update({"name": user}, {"$set":{"greeting": greeting}})
+
+
+def getGreeting(user):
+    account = accounts.find_one({"name": user})
+    if account is not None:
+        return account["greeting"]
+
 
 

@@ -83,6 +83,7 @@ tokens = []
 
 
 def tokenCheck(token):
+    print(tokens, flush=True)
     return token in tokens
 
 

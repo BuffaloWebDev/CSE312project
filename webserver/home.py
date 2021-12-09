@@ -1,10 +1,10 @@
 # home.py
 
 from accounts import getOnlineUsers, checkAuthToken
-from utils import template, token, addToken
-from database import get_feed, add_feed, numberOfFeedItems, fetch_account_by_token
+from utils import template, token, addToken, hash, escapeHTML
+from database import get_feed, add_feed, numberOfFeedItems, fetch_account_by_token, getGreeting
 
-def serveHome(handler):
+def serveHome(handler, authToken):
     with open("resources/home.html", "rb") as f:
         responseBody = f.read()
 
@@ -22,7 +22,13 @@ def serveHome(handler):
                         f"<p>{item['from']}: {item['caption'].decode()}</p>" \
                     f"</div> <br/>"
 
-    replacements = [("{{OnlineUsers}}", clientListHTML), ("{{Feed}}", feedHTML)]
+    username = fetch_account_by_token(authToken)
+    greeting = getGreeting(username)
+
+    xsrf = token().encode()
+    addToken(xsrf)
+
+    replacements = [("{{OnlineUsers}}", clientListHTML), ("{{Feed}}", feedHTML), ("{{Greeting}}", greeting), ("{{XSRFToken}}", xsrf)]
     responseBody = template(responseBody, replacements)
 
     handler.sendMessage(responseBody, "html", 200)
@@ -38,19 +44,17 @@ def newPostPage(handler):
     handler.sendMessage(responseBody, "html")
 
 def dmPage(handler, authToken):
-    if not checkAuthToken(authToken):
-        print("Auth token broken", flush=True)
-        handler.denied()
-
     username = fetch_account_by_token(authToken)
 
     with open(f"resources/dm.html", "rb") as requestedFile:
         responseBody = requestedFile.read()
 
     clients = getOnlineUsers()
+
     clientListHTML = ""
     for client in clients:
-        clientListHTML += f'<option value="{client["username"]}">{client["username"]}</option>'
+        if client["username"] != username:
+            clientListHTML += f'<option value="{client["username"]}">{client["username"]}</option>'
     
     replacements = [("{{OnlineUsers}}", clientListHTML), ("{{userName}}", username)]
     responseBody = template(responseBody, replacements)
@@ -58,10 +62,6 @@ def dmPage(handler, authToken):
     handler.sendMessage(responseBody, "html")
 
 def livePage(handler, authToken):
-    if not checkAuthToken(authToken):
-        print("Auth token broken", flush=True)
-        handler.denied()
-
     username = fetch_account_by_token(authToken)
 
     with open(f"resources/live.html", "rb") as requestedFile:
@@ -72,9 +72,7 @@ def livePage(handler, authToken):
 
     handler.sendMessage(responseBody, "html")
 
-def newPostSubmission(handler, cookies, form):
-    authToken = cookies.get("auth-token") if cookies is not None and "auth-token" in cookies else None
-
+def newPostSubmission(handler, authToken, form):
     if not checkAuthToken(authToken):
         print("Auth token broken", flush=True)
         handler.denied()
@@ -88,6 +86,7 @@ def newPostSubmission(handler, cookies, form):
         f.write(image)
 
     caption = form.get("caption")
+    caption = escapeHTML(caption)
     add_feed(username, filename, caption)
 
     handler.redirect("/home")

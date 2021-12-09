@@ -7,6 +7,8 @@
 <body>
 <h1>Make a New Post:</h1>
 
+<p> Only .jpg files can be uploaded! </p> <br/>
+
 <form action="/newPost" id="login-form" method="post" enctype="multipart/form-data">
     <input value = {{XSRFToken}} name = "xsrf_token" hidden>
     <label for="image">Image: </label>

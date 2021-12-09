@@ -25,9 +25,10 @@ class WebServer(socketserver.StreamRequestHandler):
         self.send(response)
 
 
-    def redirect(self, location, msg=""):
+    def redirect(self, location, otherHeaders=[]):
         responseHeaders = ["Location: " + location, utils.contentLength(0)]
-        self.stitch(301, responseHeaders)
+        responseHeaders.extend(otherHeaders)
+        self. stitch(301, responseHeaders)
 
 
     def sendMessage(self, msg, contentType="plain", code=200):

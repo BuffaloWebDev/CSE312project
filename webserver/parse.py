@@ -61,7 +61,8 @@ def encodeJSON(value):
 
 
 def decodeJSON(value):
-    return loads(value)
+    temp = loads(value)
+    return temp
 
 
 def userToDict(user):
@@ -72,5 +73,6 @@ def rowToDict(row, headers):
     return {headers[i]: row[i] for i in range(len(row))}
 
 def cookies(cookieHeader):
-    cookies = [cookie.split("=") for cookie in cookieHeader]
-    return {cookie[0]:cookie[1] for cookie in cookies if len(cookie) == 2}
+    if cookieHeader is not None:
+        cookies = [cookie.split("=") for cookie in cookieHeader]
+        return {cookie[0]:cookie[1] for cookie in cookies if len(cookie) == 2}

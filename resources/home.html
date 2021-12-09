@@ -6,11 +6,6 @@
 <body>
 
 	<h1 style = "display: inline-block">CSE312 Project</h1>
-
-
-
-				
-			
 			<div style = "float:right">
 				<div class = "inline-button"> 
 					<a href="/newPost"> Create a Post</a>
@@ -19,6 +14,7 @@
 				</div>
 			</div>
 		</div>
+	<h2>{{Greeting}}</h2>
 
 
 <div style="display: flex">
@@ -34,7 +30,12 @@
 </div>
 
 </div>
-
-<script src="functions.js"></script>
+	<h2> Change your greeting </h2>
+	<form action="/greeting" id="greeting-form" method="post" enctype="multipart/form-data">
+		<input value = {{XSRFToken}} name = "xsrf_token" hidden>
+		<label for="greeting">Greeting: </label>
+		<input id="greeting" type="text" name="greeting" required> <br/>
+		<input type="submit" value="Submit">
+	</form>
 </body>
 </html>
