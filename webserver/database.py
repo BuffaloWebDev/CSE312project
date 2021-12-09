@@ -36,7 +36,13 @@ def fetch_account(name):
     return accounts.find_one({"name": name})
 
 
-def fetch_account_by_token(hashed):
+def fetch_account_by_token(token):
+    if isinstance(token, str):
+        token = token.encode()
+
+    print(token, flush=True)
+    print(type(token), flush=True)
+    hashed = hash(token)
     account = accounts.find_one({"token": hashed})
     if account is not None:
         return account["name"]
@@ -64,6 +70,7 @@ def add_feed(sender, filename, caption):
             "timestamp": time.time()
         }
     feed.insert_one(post)
+
 
 def get_feed():
     return feed.find({})

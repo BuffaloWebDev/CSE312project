@@ -60,9 +60,8 @@ def getUser(userID):
 def checkAuthToken(token):
     if token is None:
         return False
-    hashed = utils.hash(token)
 
-    user = database.fetch_account_by_token(hashed)
+    user = database.fetch_account_by_token(token)
     return user is not None
 
 

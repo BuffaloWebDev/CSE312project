@@ -97,12 +97,15 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
                 else:
                     handler.sendMessage(responseBody)
             elif requestPath == "/newPost":
-                home.newPostSubmission(handler, cookies, form)
+                authToken = cookies.get("auth-token") \
+                    if cookies is not None and "auth-token" in cookies else None
+
+                home.newPostSubmission(handler, authToken, form)
             elif requestPath == "/greeting":
                 authToken = cookies.get("auth-token") \
                     if cookies is not None and "auth-token" in cookies else None
 
-                username = database.fetch_account_by_token(utils.hash(authToken))
+                username = database.fetch_account_by_token(authToken)
                 greeting = form.get("greeting")
                 if greeting is not None and username is not None:
                     database.changeGreeting(username, greeting)

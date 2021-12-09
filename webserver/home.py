@@ -1,7 +1,7 @@
 # home.py
 
 from accounts import getOnlineUsers, checkAuthToken
-from utils import template, token, addToken, hash
+from utils import template, token, addToken, hash, escapeHTML
 from database import get_feed, add_feed, numberOfFeedItems, fetch_account_by_token, getGreeting
 
 def serveHome(handler, authToken):
@@ -22,7 +22,7 @@ def serveHome(handler, authToken):
                         f"<p>{item['from']}: {item['caption'].decode()}</p>" \
                     f"</div> <br/>"
 
-    username = fetch_account_by_token(hash(authToken))
+    username = fetch_account_by_token(authToken)
     greeting = getGreeting(username)
 
     xsrf = token().encode()
@@ -72,9 +72,7 @@ def livePage(handler, authToken):
 
     handler.sendMessage(responseBody, "html")
 
-def newPostSubmission(handler, cookies, form):
-    authToken = cookies.get("auth-token") if cookies is not None and "auth-token" in cookies else None
-
+def newPostSubmission(handler, authToken, form):
     if not checkAuthToken(authToken):
         print("Auth token broken", flush=True)
         handler.denied()
@@ -88,7 +86,7 @@ def newPostSubmission(handler, cookies, form):
         f.write(image)
 
     caption = form.get("caption")
-    caption = utils.escapeHTML(caption)
+    caption = escapeHTML(caption)
     add_feed(username, filename, caption)
 
     handler.redirect("/home")
