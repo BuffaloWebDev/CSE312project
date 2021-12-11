@@ -9,19 +9,21 @@ db = client["database"]
 accounts = db["accounts"]
 messages = db["messages"]
 feed = db["feed"]
-#feed.drop()
-#accounts.drop()
+# feed.drop()
+# accounts.drop()
 
 # TODO Add unique ID for each account
+
+
 def add_account(name, password):
     user_key = accounts.find_one({"name": name})
     if user_key is None:
         account = {
-                "name": name,
-                "password": password,
-                "token": None,
-                "greeting": "Hello there!"
-            }
+            "name": name,
+            "password": password,
+            "token": None,
+            "greeting": "Hello there!"
+        }
         accounts.insert_one(account)
         return "Registration successful"
     else:
@@ -29,7 +31,7 @@ def add_account(name, password):
 
 
 def changeAuthToken(user, token):
-    accounts.find_one_and_update({"name": user}, {"$set":{"token": token}})
+    accounts.find_one_and_update({"name": user}, {"$set": {"token": token}})
 
 
 def fetch_account(name):
@@ -54,21 +56,21 @@ def fetch_accounts():
 
 def add_message(sender, to, message):
     post = {
-            "from": sender,
-            "to": to,
-            "message": message,
-            "timestamp": time.time()
-        }
+        "from": sender,
+        "to": to,
+        "message": message,
+        "timestamp": time.time()
+    }
     messages.insert_one(post)
 
 
 def add_feed(sender, filename, caption):
     post = {
-            "from": sender,
-            "filename": filename,
-            "caption": caption,
-            "timestamp": time.time()
-        }
+        "from": sender,
+        "filename": filename,
+        "caption": caption,
+        "timestamp": time.time()
+    }
     feed.insert_one(post)
 
 
@@ -82,13 +84,11 @@ def numberOfFeedItems():
 
 def changeGreeting(user, greeting):
     greeting = escapeHTML(greeting)
-    accounts.find_one_and_update({"name": user}, {"$set":{"greeting": greeting}})
+    accounts.find_one_and_update(
+        {"name": user}, {"$set": {"greeting": greeting}})
 
 
 def getGreeting(user):
     account = accounts.find_one({"name": user})
     if account is not None:
         return account["greeting"]
-
-
-

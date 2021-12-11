@@ -10,7 +10,6 @@ skipLine = "\r\n\r\n"
 
 class WebServer(socketserver.StreamRequestHandler):
 
-
     def send(self, message):
         self.request.sendall(message)
 
@@ -24,25 +23,21 @@ class WebServer(socketserver.StreamRequestHandler):
         response += body
         self.send(response)
 
-
     def redirect(self, location, otherHeaders=[]):
         responseHeaders = ["Location: " + location, utils.contentLength(0)]
         responseHeaders.extend(otherHeaders)
         self. stitch(301, responseHeaders)
 
-
     def sendMessage(self, msg, contentType="plain", code=200):
-        responseHeaders = [utils.cType[contentType], utils.nosniff, utils.contentLength(len(msg))]
+        responseHeaders = [utils.cType[contentType],
+                           utils.nosniff, utils.contentLength(len(msg))]
         self.stitch(code, responseHeaders, msg)
-
 
     def notFound(self):
         self.sendMessage(b"Content not found", code=404)
 
-
     def denied(self):
         self.sendMessage(b"Request has been denied", code=403)
-
 
     def handle(self):
         # Start of parsing. Receive request and put headers into dict
@@ -63,7 +58,8 @@ class WebServer(socketserver.StreamRequestHandler):
         requestType = request[0]
         requestPath = request[1]
 
-        routes.route(requestHeaders, requestBody, requestType, requestPath, self)
+        routes.route(requestHeaders, requestBody,
+                     requestType, requestPath, self)
 
 
 if __name__ == "__main__":

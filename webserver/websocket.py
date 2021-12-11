@@ -5,9 +5,6 @@ from base64 import b64encode
 
 import parse
 import utils
-import database
-import routes
-import webserver
 import accounts
 
 all_sockets = []

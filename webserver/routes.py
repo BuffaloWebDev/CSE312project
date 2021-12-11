@@ -20,12 +20,11 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
         elif requestPath in redirects:
             handler.redirect(redirects[requestPath])
 
-        elif requestPath == "/websocket" and "Upgrade" in requestHeaders[
-            'Connection'] and "websocket" in requestHeaders['Upgrade']:
+        elif requestPath == "/websocket" and "Upgrade" in requestHeaders['Connection'] and "websocket" in requestHeaders['Upgrade']:
             randKey = requestHeaders['Sec-WebSocket-Key'][0]
             websocket.establish(handler, randKey)
 
-        elif requestPath in files: # Public files (css and js)
+        elif requestPath in files:  # Public files (css and js)
             with open(f"resources{requestPath}", "rb") as requestedFile:
                 responseBody = requestedFile.read()
             extension = requestPath.split(".")[-1]
@@ -51,7 +50,8 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
                 home.livePage(handler, authToken)
 
             else:
-                uploadedImages = [item["filename"] for item in database.get_feed()]
+                uploadedImages = [item["filename"]
+                                  for item in database.get_feed()]
 
                 if requestPath[1:] in uploadedImages:
                     with open(f"resources/uploadedImages{requestPath}", "rb") as f:
@@ -66,7 +66,8 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
 
         else:
             length = int(requestHeaders['Content-Length'][0])
-            delimiter = b"--" + bytes(requestHeaders['Content-Type'][1][10:], encoding="utf-8")
+            delimiter = b"--" + \
+                bytes(requestHeaders['Content-Type'][1][10:], encoding="utf-8")
             while len(requestBody) < length:
                 requestBody += handler.request.recv(2048)
 
@@ -90,7 +91,8 @@ def route(requestHeaders, requestBody, requestType, requestPath, handler):
 
                     database.changeAuthToken(username, hashed)
 
-                    responseHeaders = [utils.setCookie("auth-token", token, ["Max-Age = 3600", "HttpOnly"])]
+                    responseHeaders = [utils.setCookie(
+                        "auth-token", token, ["Max-Age = 3600", "HttpOnly"])]
 
                     accounts.addOnlineUser(username, handler)
                     handler.redirect("/home", responseHeaders)

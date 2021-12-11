@@ -1,41 +1,44 @@
 <html>
+
 <head>
     <title>CSE312 Project</title>
-    <link rel="stylesheet" type="text/css" href="style.css"/>
+    <link rel="stylesheet" type="text/css" href="style.css" />
 </head>
+
 <body>
 
-	<h1 style = "display: inline-block">CSE312 Project</h1>
-			<div style = "float:right">
-				<div class = "inline-button"> 
-					<a href="/newPost"> Create a Post</a>
-					<a href="/live">Live Interaction</a>
-	  				<a href="/dm"> Direct Messages</a>
-				</div>
-			</div>
-		</div>
-	<h2>{{Greeting}}</h2>
+    <h1 style="display: inline-block">CSE312 Project</h1>
+    <div style="float:right">
+        <div class="inline-button">
+            <a href="/newPost"> Create a Post</a>
+            <a href="/live">Live Interaction</a>
+            <a href="/dm"> Direct Messages</a>
+        </div>
+    </div>
+    </div>
+    <h2>{{Greeting}}</h2>
 
 
-<div style="display: flex">
-<div class = "feed">
-<h2>Feed</h2>
-	{{Feed}}
-</div>
-<div class="onlineList">
-<h2>Online Users</h2>
-	<div class = "innerContainer">
-		{{OnlineUsers}}
-	</div>
-</div>
+    <div style="display: flex">
+        <div class="feed">
+            <h2>Feed</h2>
+            {{Feed}}
+        </div>
+        <div class="onlineList">
+            <h2>Online Users</h2>
+            <div class="innerContainer">
+                {{OnlineUsers}}
+            </div>
+        </div>
 
-</div>
-	<h2> Change your greeting </h2>
-	<form action="/greeting" id="greeting-form" method="post" enctype="multipart/form-data">
-		<input value = {{XSRFToken}} name = "xsrf_token" hidden>
-		<label for="greeting">Greeting: </label>
-		<input id="greeting" type="text" name="greeting" required> <br/>
-		<input type="submit" value="Submit">
-	</form>
+    </div>
+    <h2> Change your greeting </h2>
+    <form action="/greeting" id="greeting-form" method="post" enctype="multipart/form-data">
+        <input value={{XSRFToken}} name="xsrf_token" hidden>
+        <label for="greeting">Greeting: </label>
+        <input id="greeting" type="text" name="greeting" required> <br />
+        <input type="submit" value="Submit">
+    </form>
 </body>
+
 </html>

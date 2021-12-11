@@ -7,6 +7,7 @@ import utils
 
 from bcrypt import hashpw, checkpw, gensalt
 
+
 def loginPage(handler):
     with open("resources/login.html", "rb") as f:
         responseBody = f.read()
@@ -20,8 +21,10 @@ def loginPage(handler):
 
     handler.sendMessage(responseBody, "html", 200)
 
+
 def validUsername(username):
     return not any([str(char) in "<>&/" for char in username])
+
 
 def validPassword(pwd):
     pwd = pwd.decode()
@@ -30,9 +33,11 @@ def validPassword(pwd):
     lowercase = any([str(char).islower for char in pwd])
     uppercase = any([str(char).isupper for char in pwd])
     containsNum = any([str(char).isdigit for char in pwd])
-    containsSpecial = any([str(char) in "`~!@#$%^*()-_=+[{]}\|;:,.?" for char in pwd])
+    containsSpecial = any(
+        [str(char) in "`~!@#$%^*()-_=+[{]}\|;:,.?" for char in pwd])
     html = not any([str(char) in "<>&/" for char in pwd])
     return longEnough and notPwd and lowercase and uppercase and containsNum and containsSpecial and html
+
 
 def login(username, pwd):
     credentials = database.fetch_account(username)
@@ -50,13 +55,17 @@ def register(username, pwd):
         return database.add_account(username, hashed)
     return "Username and password must meet all requirements"
 
+
 def listUsers():
     return parse.encodeJSON(database.fetch_accounts())
+
 
 def getUser(userID):
     return parse.encodeJSON(database.fetch_accounts_by_id(userID)) if database.user_exists(userID) else None
 
 # Checks if a user is logged in, given an auth token
+
+
 def checkAuthToken(token):
     if token is None:
         return False
@@ -71,10 +80,12 @@ clients = []
 def getOnlineUsers():
     return clients
 
+
 def getUserByHandler(handler):
     for client in clients:
         if client["handler"] == handler:
             return client
+
 
 def addOnlineUser(username, handler):
     clients.append({
@@ -82,7 +93,7 @@ def addOnlineUser(username, handler):
         "handler": handler
     })
 
+
 def removeOnlineUser(handler):
     global clients
     clients = [client for client in clients if client["handler"] != handler]
-

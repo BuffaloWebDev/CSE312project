@@ -11,14 +11,13 @@
 }
 
 .innerContainer {
-  padding-left: 25%;
-  padding-bottom: 50px;
-  text-align: left;
-  font-size: x-large;
+    padding-left: 25%;
+    padding-bottom: 50px;
+    text-align: left;
+    font-size: x-large;
 }
 
-
-.feed > h2 {
+.feed>h2 {
     text-align: center;
 }
 
@@ -26,18 +25,17 @@
     width: 100%;
 }
 
-.feedItem > p {
- padding-left: 2vw;
+.feedItem>p {
+    padding-left: 2vw;
 }
 
-
-.feedItem > img {
+.feedItem>img {
     max-width: 70vw;
     display: block;
     margin-left: auto;
     margin-right: auto;
 }
 
-.onlineList > h2 {
+.onlineList>h2 {
     text-align: center;
 }
